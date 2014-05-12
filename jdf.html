@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="Luc LEGER">
+        <link rel="shortcut icon" href="">
+        <title>Jour de fête</title>
+
+        <!-- Bootstrap core CSS -->
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/bootstrap-theme.min.css" rel="stylesheet">
+        
+        <!-- Leaflet -->
+         <link href="leaflet/leaflet.css" rel="stylesheet">
+
+        <!-- Custom styles for this template -->
+        <link href="css/main.css" rel="stylesheet">
+        <style>body{padding-top:50px;}.starter-template{padding:40px 15px;text-align:center;}</style>
+
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+        
+        
+        
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="starter-template">
+                <h2>Géo-codeur</h2>
+                <div class="jumbotron">
+                    <h1>Jour de Fête</h1>
+                </div>
+            </div>
+            
+            <div class="row marketing">
+                <div class="col-md-12" style="height: 8em">
+                    <h3>Recherche d'une adresse :</h3>
+                    <div id="remote">
+                        <input class="col-md-8 typeahead" type="text" placeholder="Entrer une adresse ...">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4" id="map" style="height: 400px" ></div>
+            
+        </div>
+        
+        
+        
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js">
+        </script>
+        <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/typeahead.bundle.js"></script>
+        <script src="js/handlebars.js"></script>
+        <script src="leaflet/leaflet.js"></script>
+        
+      
+        <script type="text/javascript">
+            
+            // Leaflet --------------------------------
+            var map = L.map('map').setView([47.3944,0.6940], 13);
+            L.tileLayer('http://tile.osm.org/{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+                    '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ',
+                id: 'examples.map-9ijuk24y'
+            }).addTo(map);
+
+            
+            // --------------------------------
+            function knownType(typeName){
+                arrayType = [
+                    "primary",
+                    "secondary",
+                    "tertiary",
+                    "residential",
+                    "bus_stop",
+                    "tram_stop",
+                    "bakery",
+                ];
+                if( arrayType.indexOf(typeName) != -1 ) {
+                    return true;
+                }
+                                
+                return false;
+            };
+            
+            Handlebars.registerHelper('ifKnownType', function(item, block) {
+              var selected = knownType( item );
+              if (selected) {
+                  return block.fn(this);
+              }
+              return '';
+            });
+            
+            function sortBySemantic(key1, key2){
+                return key1.semantic > key2.semantic;
+            }
+            var adresses = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('libelle'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                remote: {
+                    url: 'http://localhost:8000/api/places/search/%QUERY/?format=json'
+                },
+                limit: 10,
+                filter: function(response) {
+                    response.sort(sortBySemantic);
+                    return response
+                }
+            });
+            
+            
+            
+            // initialize the bloodhound suggestion engine
+            adresses.initialize();
+            
+            // instantiate the typeahead UI
+            $('#remote .typeahead').typeahead(null,
+                {
+                    minLength: 3,
+                    highlight: true,
+                    hint: false,
+                    displayKey: 'libelle',
+                    name: 'adresses',
+                    source: adresses.ttAdapter(),
+                    templates: {
+                        empty: [
+                            '<div class="empty-message">',
+                            'Aucune réponse ne correspond.',
+                            '</div>'
+                        ].join('\n'),
+                        suggestion: Handlebars.compile('<p>{{#ifKnownType type }} <img src="icons/{{type}}.png">{{/ifKnownType}}<strong>{{libelle}}</strong></p>')
+                        
+                    }
+                });
+
+         </script>
+        
+        
+        
+        
+    </body>
+</html>
