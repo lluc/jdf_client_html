@@ -32,26 +32,28 @@
 
     <body>
         <div class="container">
-            <div class="starter-template">
-                <h2>Géo-codeur</h2>
-                <div class="jumbotron">
-                    <h1>Jour de Fête</h1>
-                </div>
+
+            <div class="jumbotron">
+                <h1>Jour de Fête</h1>
+                <p class="lead">Géo-codeur</p>
             </div>
             
-            <div class="row marketing">
-                <div class="col-md-12" style="height: 8em">
+            <div class="row">
+                <div class="col-lg-6" style="height: 8em">
                     <h3>Recherche d'une adresse :</h3>
                     <div id="remote">
-                        <input class="col-md-8 typeahead" type="text" placeholder="Entrer une adresse ...">
+                        <input class="typeahead" type="text" placeholder="Entrer une adresse ...">
                     </div>
                 </div>
+                <div class="col-lg-6" id="map" style="height: 600px" >
+                </div>
             </div>
-            
-            <div class="col-md-4" id="map" style="height: 400px" ></div>
             
         </div>
         
+        <div class="footer">
+            <p><a href="https://github.com/lluc/jdf_client_html">Sources sur Github</a> -  Licence GPL v3</p>
+        </div>
         
         
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
@@ -71,8 +73,7 @@
             L.tileLayer('http://tile.osm.org/{z}/{x}/{y}.png', {
                 maxZoom: 18,
                 attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-                    '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ',
-                id: 'examples.map-9ijuk24y'
+                    '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, '
             }).addTo(map);
 
             
@@ -105,6 +106,7 @@
             function sortBySemantic(key1, key2){
                 return key1.semantic > key2.semantic;
             }
+                    
             var adresses = new Bloodhound({
                 datumTokenizer: Bloodhound.tokenizers.obj.whitespace('libelle'),
                 queryTokenizer: Bloodhound.tokenizers.whitespace,
@@ -120,10 +122,10 @@
             
             
             
-            // initialize the bloodhound suggestion engine
+            // Initialize the bloodhound suggestion engine
             adresses.initialize();
             
-            // instantiate the typeahead UI
+            // Instantiate the typeahead UI
             $('#remote .typeahead').typeahead(null,
                 {
                     minLength: 3,
@@ -142,6 +144,17 @@
                         
                     }
                 });
+            
+            // Binding selected event.
+            $('#remote').bind('typeahead:selected', function(obj, datum, name){
+
+                // Using regular expression to parse the geometry of the
+                //   bounding box.
+                /^BOX\(([0-9.]*)\s([0-9.]*),([0-9.]*)\s([0-9.]*)/.exec(datum.st_box2d);
+                
+                // Fit the map with the bounding box coordinates.
+                map.fitBounds( [ [RegExp.$2,RegExp.$1], [RegExp.$4,RegExp.$3] ] );
+            });
 
          </script>
         
