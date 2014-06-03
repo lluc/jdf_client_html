@@ -78,7 +78,7 @@
 
             
             // --------------------------------
-            function knownType(typeName){
+            function logoType(typeName){
                 arrayType = [
                     "primary",
                     "secondary",
@@ -95,13 +95,34 @@
                 return false;
             };
             
-            Handlebars.registerHelper('ifKnownType', function(item, block) {
-              var selected = knownType( item );
+            Handlebars.registerHelper('ifLogoType', function(item, block) {
+              var selected = logoType( item );
               if (selected) {
                   return block.fn(this);
               }
               return '';
             });
+            
+            
+            function unwantedType(typeName){
+                arrayType = [
+                    "platform",
+                ];
+                if( arrayType.indexOf(typeName) != -1 ) {
+                    return false;
+                }
+                                
+                return true;
+            };
+            
+            Handlebars.registerHelper('ifUnwantedType', function(item, block) {
+              var selected = unwantedType( item );
+              if (selected) {
+                  return block.fn(this);
+              }
+              return '';
+            });
+            
             
             function sortBySemantic(key1, key2){
                 return key1.semantic > key2.semantic;
@@ -114,9 +135,9 @@
                     url: 'http://localhost:8000/api/places/search/%QUERY/?format=json'
                 },
                 limit: 10,
-                filter: function(response) {
-                    response.sort(sortBySemantic);
-                    return response
+                filter: function(data) {
+                    data.sort(sortBySemantic);
+                    return data;
                 }
             });
             
@@ -140,7 +161,8 @@
                             'Aucune réponse ne correspond.',
                             '</div>'
                         ].join('\n'),
-                        suggestion: Handlebars.compile('<p>{{#ifKnownType type }} <img src="icons/{{type}}.png">{{/ifKnownType}}<strong>{{libelle}}</strong></p>')
+                        suggestion: Handlebars.compile('{{#ifUnwantedType type}}<p>{{#ifLogoType type}}'+
+                        '<img src="icons/{{type}}.png">{{/ifLogoType}}<strong>{{libelle}}</strong>, {{type}}</p>{{/ifUnwantedType}}')
                         
                     }
                 });
