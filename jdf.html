@@ -80,12 +80,9 @@
             // --------------------------------
             function logoType(typeName){
                 arrayType = [
-                    "primary",
-                    "secondary",
-                    "tertiary",
-                    "residential",
                     "bus_stop",
                     "tram_stop",
+                    "supermarket",
                     "bakery",
                 ];
                 if( arrayType.indexOf(typeName) != -1 ) {
@@ -124,20 +121,20 @@
             });
             
             
-            function sortBySemantic(key1, key2){
-                return key1.semantic > key2.semantic;
+            function sortByWeight(key1, key2){
+                return key1.poids > key2.poids;
             }
                     
             var adresses = new Bloodhound({
                 datumTokenizer: Bloodhound.tokenizers.obj.whitespace('libelle'),
                 queryTokenizer: Bloodhound.tokenizers.whitespace,
                 remote: {
-                    url: 'http://localhost:8000/api/places/search/%QUERY/?format=json'
+                    url: 'http://jdf.geovelo.fr/api/places/search/%QUERY/?format=json'
                 },
-                limit: 10,
-                filter: function(data) {
-                    data.sort(sortBySemantic);
-                    return data;
+                limit: 7,
+                filter: function(parsedResponse) {
+                    data.sort(sortByWeight);
+                    return parsedResponse;
                 }
             });
             
@@ -162,7 +159,7 @@
                             '</div>'
                         ].join('\n'),
                         suggestion: Handlebars.compile('{{#ifUnwantedType type}}<p>{{#ifLogoType type}}'+
-                        '<img src="icons/{{type}}.png">{{/ifLogoType}}<strong>{{libelle}}</strong>, {{type}}</p>{{/ifUnwantedType}}')
+                        '<img src="icons/{{type}}.png">{{/ifLogoType}}<strong>{{libelle}}</strong>, {{ville}}, {{type}}</p>{{/ifUnwantedType}}')
                         
                     }
                 });
