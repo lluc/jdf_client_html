@@ -177,7 +177,7 @@
 
                 // Using regular expression to parse the geometry of the
                 //   bounding box.
-                /^BOX\(([0-9.]*)\s([0-9.]*),([0-9.]*)\s([0-9.]*)/.exec(datum.st_box2d);
+                /^BOX\((-*[0-9.]*)\s(-*[0-9.]*),(-*[0-9.]*)\s(-*[0-9.]*)/.exec(datum.st_box2d);
                 
                 // Fit the map with the bounding box coordinates.
                 map.fitBounds( [ [RegExp.$2,RegExp.$1], [RegExp.$4,RegExp.$3] ] );
